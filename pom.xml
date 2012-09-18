@@ -46,6 +46,7 @@
       <groupId>org.apache.openejb</groupId>
       <artifactId>ziplock</artifactId>
       <version>${tomee.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.arquillian.junit</groupId>
