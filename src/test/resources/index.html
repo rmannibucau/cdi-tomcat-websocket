@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <script type="text/javascript">
+            function start() {
+                // sse with WS, client is a simple WS client which simply listen
+                var socket = null;
+                var url = 'ws://' + window.location.host + "/sse-1.0-SNAPSHOT/impl";
+                if ('WebSocket' in window) {
+                    socket = new WebSocket(url);
+                } else if ('MozWebSocket' in window) {
+                    socket = new MozWebSocket(url);
+                } else {
+                    alert('Error: WebSocket is not supported by this browser.');
+                    return;
+                }
+
+                socket.onmessage = function (message) {
+                    document.getElementById("sse-content").innerHTML += "<br />" + message.data;
+                };
+            }
+        </script>
+    </head>
+    <body onload="start()">
+        SSE data:
+        <div id="sse-content">
+            wait some refresh
+        </div>
+    </body>
+</html>
