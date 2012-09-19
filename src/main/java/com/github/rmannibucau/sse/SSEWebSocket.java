@@ -1,5 +1,6 @@
 package com.github.rmannibucau.sse;
 
+import com.github.rmannibucau.sse.impl.SSEWebSocketStorage;
 import org.apache.catalina.websocket.MessageInbound;
 import org.apache.catalina.websocket.StreamInbound;
 import org.apache.catalina.websocket.WebSocketServlet;
@@ -13,30 +14,17 @@ import java.nio.CharBuffer;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public abstract class SSEWebSocket extends WebSocketServlet {
+public class SSEWebSocket extends WebSocketServlet {
     public static final String ID_KEY = "id";
-    public static final String INSTANCES_KEY = SSEWebSocket.class.getName() + "-instances";
 
     private final Collection<SSEStreamInbound> sseInbounds = new CopyOnWriteArrayList<SSEStreamInbound>();
 
     public void init() throws ServletException {
-        Collection<SSEWebSocket> instance = instances();
-        if (instance == null) {
-            instance = new CopyOnWriteArrayList<SSEWebSocket>();
-            getServletContext().setAttribute(INSTANCES_KEY, instance);
-        }
-        instance.add(this);
-    }
-
-    private Collection<SSEWebSocket> instances() {
-        return (Collection<SSEWebSocket>) getServletContext().getAttribute(INSTANCES_KEY);
+        SSEWebSocketStorage.currentWSs().add(this);
     }
 
     public void destroy() {
-        final Collection<SSEWebSocket> instance = instances();
-        if (instance != null) {
-            instance.remove(this);
-        }
+        SSEWebSocketStorage.currentWSs().remove(this);
     }
 
     @Override

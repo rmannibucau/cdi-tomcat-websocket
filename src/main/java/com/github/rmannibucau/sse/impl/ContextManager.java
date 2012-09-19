@@ -7,7 +7,7 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import java.util.Set;
 
-public class ServletContextManager implements ServletContainerInitializer, ServletContextListener {
+public class ContextManager implements ServletContainerInitializer, ServletContextListener {
     @Override
     public void onStartup(final Set<Class<?>> classes, final ServletContext ctx) throws ServletException {
         ctx.addListener(this);
@@ -16,10 +16,12 @@ public class ServletContextManager implements ServletContainerInitializer, Servl
     @Override
     public void contextInitialized(final ServletContextEvent sce) {
         SSESenderHelper.register(sce.getServletContext());
+        SSEWebSocketStorage.register(sce.getServletContext());
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         SSESenderHelper.unregister(sce.getServletContext());
+        SSEWebSocketStorage.unregister(sce.getServletContext());
     }
 }

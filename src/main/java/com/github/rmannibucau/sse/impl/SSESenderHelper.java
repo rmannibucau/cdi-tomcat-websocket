@@ -1,32 +1,27 @@
 package com.github.rmannibucau.sse.impl;
 
 import com.github.rmannibucau.sse.SSEWebSocket;
+import org.apache.catalina.websocket.WebSocketServlet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.annotation.WebServlet;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class SSESenderHelper {
-    private static Map<ClassLoader, ServletContext> CONTEXTS = new HashMap<ClassLoader, ServletContext>();
-    public static final String WILDCARD = "*";
+    private static final String WILDCARD = "*";
+    private static final String[] EMPTY_URL_PATTERN = new String[0];
+
+    private static Map<ClassLoader, Map<Class<?>, String[]>> URL_PATTERN_CACHE = new ConcurrentHashMap<ClassLoader, Map<Class<?>, String[]>>();
 
     private SSESenderHelper() {
         // no-op
     }
 
     public static void sendMessage(final String selectedId, final String msg) {
-        final ServletContext servletContext = currentContext();
-        if (servletContext == null) {
-            return;
-        }
-
-        final Collection<SSEWebSocket> instances = (Collection<SSEWebSocket>) servletContext.getAttribute(SSEWebSocket.INSTANCES_KEY);
-        if (instances == null) {
-            return;
-        }
-
+        final Collection<SSEWebSocket> instances = SSEWebSocketStorage.currentWSs();
         for (SSEWebSocket webSocket : instances) {
             String id = webSocket.getInitParameter(SSEWebSocket.ID_KEY);
             if (id == null) {
@@ -56,24 +51,52 @@ public final class SSESenderHelper {
         return selectedId.equals(id);
     }
 
-    private static String[] findUrlPatterns(final SSEWebSocket webSocket) { // TODO: cache
-        final WebServlet webServlet = webSocket.getClass().getAnnotation(WebServlet.class);
-        if (webServlet == null) {
-            return null;
+    private static String[] findUrlPatterns(final SSEWebSocket webSocket) {
+        final Class<?> clazz = webSocket.getClass();
+        final ClassLoader loader = clazz.getClassLoader();
+        final Map<Class<?>, String[]> clValues = getUrlPatternMap(loader);
+
+        String[] patterns = clValues.get(clazz);
+        if (patterns != null) {
+            return patterns;
         }
 
-        return webServlet.urlPatterns();
+        final WebServlet webServlet = webSocket.getClass().getAnnotation(WebServlet.class);
+        if (webServlet == null) {
+            patterns = EMPTY_URL_PATTERN;
+        } else {
+            patterns = webServlet.urlPatterns();
+        }
+
+        clValues.put(clazz, patterns);
+        return patterns;
     }
 
-    private static ServletContext currentContext() {
-        return CONTEXTS.get(Thread.currentThread().getContextClassLoader());
+    private static Map<Class<?>, String[]> getUrlPatternMap(final ClassLoader loader) {
+        for (Map.Entry<ClassLoader, Map<Class<?>, String[]>> entry : URL_PATTERN_CACHE.entrySet()) {
+            if (classLoaderMatch(loader, entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return Collections.emptyMap();
+    }
+
+    private static boolean classLoaderMatch(final ClassLoader reference, final ClassLoader compared) {
+        ClassLoader current = compared;
+        do {
+            if (current == reference) {
+                return true;
+            }
+            current = current.getParent();
+        } while (current != null && !WebSocketServlet.class.getClassLoader().equals(current));
+        return false;
     }
 
     public static void register(final ServletContext ctx) {
-        CONTEXTS.put(ctx.getClassLoader(), ctx);
+        URL_PATTERN_CACHE.put(ctx.getClassLoader(),  new ConcurrentHashMap<Class<?>, String[]>());
     }
 
     public static void unregister(final ServletContext servletContext) {
-        CONTEXTS.remove(servletContext.getClassLoader());
+        URL_PATTERN_CACHE.remove(servletContext.getClassLoader());
     }
 }

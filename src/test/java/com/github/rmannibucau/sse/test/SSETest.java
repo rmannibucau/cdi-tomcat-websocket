@@ -2,7 +2,7 @@ package com.github.rmannibucau.sse.test;
 
 import com.github.rmannibucau.sse.SSESender;
 import com.github.rmannibucau.sse.cdi.impl.SSEExtension;
-import com.github.rmannibucau.sse.impl.ServletContextManager;
+import com.github.rmannibucau.sse.impl.ContextManager;
 import org.apache.ziplock.IO;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -42,7 +42,7 @@ public class SSETest {
                     .addAsWebInfResource(EmptyAsset.INSTANCE, ArchivePaths.create("beans.xml"))
                     .addAsWebResource(new ClassLoaderAsset("index.html"), ArchivePaths.create("index.html"))
                     .addAsLibraries(ShrinkWrap.create(JavaArchive.class)
-                            .addAsServiceProvider(ServletContainerInitializer.class, ServletContextManager.class)
+                            .addAsServiceProvider(ServletContainerInitializer.class, ContextManager.class)
                             .addAsServiceProvider(Extension.class, SSEExtension.class)
                             .addPackages(true, SSESender.class.getPackage()));
     }
