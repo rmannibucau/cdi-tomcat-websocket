@@ -76,6 +76,13 @@
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>apache-snapshot</id>
+      <url>https://repository.apache.org/content/groups/snapshots/</url>
+    </repository>
+  </repositories>
+
   <properties>
     <tomcat.version>7.0.30</tomcat.version>
     <tomee.version>1.1.1-SNAPSHOT</tomee.version>
