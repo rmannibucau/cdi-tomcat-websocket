@@ -5,10 +5,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.github.rmannibucau</groupId>
-  <artifactId>sse</artifactId>
+  <artifactId>cdi-tomcat-websocket</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>SSE CDI</name>
+  <name>Tomcat WebSocket 4 CDI</name>
 
   <dependencies>
     <dependency>
@@ -54,6 +54,12 @@
       <version>1.0.2.Final</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jwebsocket</groupId>
+      <artifactId>jWebSocketJavaSEClient</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -85,6 +91,10 @@
     <repository>
       <id>apache-snapshot</id>
       <url>https://repository.apache.org/content/groups/snapshots/</url>
+    </repository>
+    <repository>
+      <id>jwebsocket</id>
+      <url>http://jwebsocket.googlecode.com/svn/repo/</url>
     </repository>
   </repositories>
 

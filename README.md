@@ -1,7 +1,35 @@
-[![Build Status](https://secure.travis-ci.org/rmannibucau/cdi-tomcat-sse.png)](http://travis-ci.org/rmannibucau/cdi-tomcat-sse)
+[![BuildStatus](https://secure.travis-ci.org/rmannibucau/cdi-tomcat-websocket.png)](http://travis-ci.org/rmannibucau/cdi-tomcat-websocket)
+
+Build
+=====
+
+    mvn clean install
+
+CDI Tomcat Event
+================
+
+It adds some CDI events corresponding to Websocket events.
+
+typically you can observe the following events:
+
+    public void onOpen(final @Observes OnOpenEvent event);
+    public void onClose(final @Observes OnCloseEvent event);
+    public void onMessage(final @Observes TextMessageEvent event);
+    public void onMessage(final @Observes ByteMessageEvent event);
+
+All events inherit from WebSocketEvent. This class offers you a stateful storage linked to the connection:
+
+    event.setData(myData);
+    MyData data = event.data(MyData.class);
+
+And some communication shortcut to send data to the client:
+
+    event.writeTextMessage("hello");
+    event.writeBinaryMessage(new byte[] { 1, 2, 3});
+
 
 CDI Tomcat SSE
-=========================
+===============
 
 SSE
 ----
@@ -13,11 +41,6 @@ However using a servlet is not a good solution for common cases.
 
 With the new websocket technology we can answer the same need a bit differently using them to send
 from the server to the client with a kind of pub/sub mecanism.
-
-Build
------
-
-    mvn clean install
 
 Usage
 -----
