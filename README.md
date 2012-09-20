@@ -26,6 +26,9 @@ And some communication shortcut to send data to the client:
 
     event.writeTextMessage("hello");
     event.writeBinaryMessage(new byte[] { 1, 2, 3});
+    event.writeTextData('a');
+    event.writeBinaryData(1);
+    event.flush();
 
 
 CDI Tomcat SSE
